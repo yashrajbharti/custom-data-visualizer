@@ -71,12 +71,9 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 }
 gl.useProgram(program);
 
-let points = [
-  { x: -0.5, y: -0.5 },
-  { x: 0.5, y: -0.5 },
-  { x: 0.5, y: 0.5 },
-  { x: -0.5, y: 0.5 },
-];
+let points = [];
+const BATCH_SIZE = 5000;
+let loadedCount = 0;
 
 const loadStoredData = () => {
   const dbRequest = indexedDB.open("largeDataDB", 1);
@@ -85,12 +82,16 @@ const loadStoredData = () => {
     const db = event.target.result;
     const transaction = db.transaction("data", "readonly");
     const store = transaction.objectStore("data");
-    const getRequest = store.getAll();
+    const cursorRequest = store.openCursor();
 
-    getRequest.onsuccess = function () {
-      if (getRequest.result.length > 0) {
-        points = getRequest.result;
-        console.log(points.length);
+    cursorRequest.onsuccess = function (event) {
+      const cursor = event.target.result;
+      if (cursor && loadedCount < BATCH_SIZE) {
+        points.push(cursor.value);
+        loadedCount++;
+        cursor.continue();
+      } else {
+        console.log(`Loaded ${points.length} points`);
         render();
       }
     };
@@ -179,6 +180,16 @@ if (redoStack.length === 0) disableButton("redo");
 
 document.getElementById("undo").addEventListener("click", undo);
 document.getElementById("redo").addEventListener("click", redo);
+document.addEventListener("keydown", (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+    if (event.shiftKey) {
+      redo();
+    } else {
+      undo();
+    }
+    event.preventDefault();
+  }
+});
 
 window.addEventListener("keydown", (event) => {
   if (event.key === "Tab") {
