@@ -104,7 +104,11 @@ const render = () => {
     gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.DYNAMIC_DRAW);
     gl.drawArrays(gl.POINTS, 0, 1);
   });
-  updateInfo(`Focused point index: ${focusedIndex}`);
+  updateInfo(
+    `Focused point index: ${focusedIndex}, moved to ${points[
+      focusedIndex
+    ].x.toFixed(2)}, ${points[focusedIndex].y.toFixed(2)}`
+  );
 };
 render();
 
