@@ -8,18 +8,18 @@ if (!gl) {
   console.error("WebGL2 not supported");
 }
 
-function updateInfo(text) {
+const updateInfo = (text) => {
   info.textContent = text;
-}
+};
 
-function resizeCanvas() {
+const resizeCanvas = () => {
   const dpr = window.devicePixelRatio || 1;
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
   canvas.style.width = window.innerWidth + "px";
   canvas.style.height = window.innerHeight + "px";
   gl.viewport(0, 0, canvas.width, canvas.height);
-}
+};
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
@@ -43,7 +43,7 @@ void main() {
     }
 }`;
 
-function createShader(gl, type, source) {
+const createShader = (gl, type, source) => {
   const shader = gl.createShader(type);
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
@@ -53,7 +53,7 @@ function createShader(gl, type, source) {
     return null;
   }
   return shader;
-}
+};
 
 const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 const fragmentShader = createShader(
@@ -94,7 +94,7 @@ let focusedIndex = 0;
 let dragging = false;
 let dragIndex = -1;
 
-function render() {
+const render = () => {
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -105,10 +105,10 @@ function render() {
     gl.drawArrays(gl.POINTS, 0, 1);
   });
   updateInfo(`Focused point index: ${focusedIndex}`);
-}
+};
 render();
 
-function getEventCoordinates(event) {
+const getEventCoordinates = (event) => {
   const rect = canvas.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
   let clientX, clientY;
@@ -122,24 +122,38 @@ function getEventCoordinates(event) {
   const x = ((clientX - rect.left) / (canvas.width / dpr)) * 2 - 1;
   const y = -(((clientY - rect.top) / (canvas.height / dpr)) * 2 - 1);
   return { x, y };
-}
+};
 
-function undo() {
+const enableButton = (_button) => {
+  const button = document.getElementById(_button);
+  button.removeAttribute("disabled");
+};
+const disableButton = (_button) => {
+  const button = document.getElementById(_button);
+  button.setAttribute("disabled", "true");
+};
+const undo = () => {
   if (history.length > 0) {
     redoStack.push(JSON.parse(JSON.stringify(points)));
     points = history.pop();
     render();
     updateInfo("Undo action performed");
-  }
-}
-function redo() {
+    enableButton("redo");
+  } else disableButton("undo");
+};
+const redo = () => {
   if (redoStack.length > 0) {
     history.push(JSON.parse(JSON.stringify(points)));
     points = redoStack.pop();
     render();
     updateInfo("Redo action performed");
-  }
-}
+    enableButton("undo");
+  } else disableButton("redo");
+};
+
+if (history.length === 0) disableButton("undo");
+if (redoStack.length === 0) disableButton("redo");
+
 document.getElementById("undo").addEventListener("click", undo);
 document.getElementById("redo").addEventListener("click", redo);
 
@@ -156,6 +170,8 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     history.push(JSON.parse(JSON.stringify(points)));
     redoStack = [];
+    enableButton("undo");
+    disableButton("redo");
 
     let moveAmount = 0.05;
     if (event.key === "ArrowUp") points[focusedIndex].y += moveAmount;
@@ -174,6 +190,8 @@ const startDragging = (event) => {
     dragging = true;
     history.push(JSON.parse(JSON.stringify(points)));
     redoStack = [];
+    enableButton("undo");
+    disableButton("redo");
   }
 };
 
