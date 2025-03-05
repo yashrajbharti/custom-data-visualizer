@@ -166,7 +166,7 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-canvas.addEventListener("mousedown", (event) => {
+const startDragging = (event) => {
   const { x, y } = getEventCoordinates(event);
   dragIndex = points.findIndex((p) => Math.hypot(p.x - x, p.y - y) < 0.05);
   if (dragIndex !== -1) {
@@ -175,41 +175,24 @@ canvas.addEventListener("mousedown", (event) => {
     history.push(JSON.parse(JSON.stringify(points)));
     redoStack = [];
   }
-});
+};
 
-canvas.addEventListener("mousemove", (event) => {
+const onMove = (event) => {
   if (dragging && dragIndex !== -1) {
     const { x, y } = getEventCoordinates(event);
     points[dragIndex] = { x, y };
     render();
   }
-});
+};
 
-canvas.addEventListener("mouseup", () => {
+const onEnd = () => {
   dragging = false;
   dragIndex = -1;
-});
+};
 
-canvas.addEventListener("touchstart", (event) => {
-  const { x, y } = getEventCoordinates(event);
-  dragIndex = points.findIndex((p) => Math.hypot(p.x - x, p.y - y) < 0.05);
-  if (dragIndex !== -1) {
-    dragging = true;
-    history.push(JSON.parse(JSON.stringify(points)));
-    redoStack = [];
-  }
-});
-
-canvas.addEventListener("touchmove", (event) => {
-  if (dragging && dragIndex !== -1) {
-    event.preventDefault();
-    const { x, y } = getEventCoordinates(event);
-    points[dragIndex] = { x, y };
-    render();
-  }
-});
-
-canvas.addEventListener("touchend", () => {
-  dragging = false;
-  dragIndex = -1;
-});
+canvas.addEventListener("mousedown", startDragging);
+canvas.addEventListener("mousemove", onMove);
+canvas.addEventListener("mouseup", onEnd);
+canvas.addEventListener("touchstart", startDragging);
+canvas.addEventListener("touchmove", onMove);
+canvas.addEventListener("touchend", onEnd);
