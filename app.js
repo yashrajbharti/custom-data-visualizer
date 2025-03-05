@@ -78,6 +78,35 @@ let points = [
   { x: -0.5, y: 0.5 },
 ];
 
+const loadStoredData = () => {
+  const dbRequest = indexedDB.open("largeDataDB", 1);
+
+  dbRequest.onsuccess = function (event) {
+    const db = event.target.result;
+    const transaction = db.transaction("data", "readonly");
+    const store = transaction.objectStore("data");
+    const getRequest = store.getAll();
+
+    getRequest.onsuccess = function () {
+      if (getRequest.result.length > 0) {
+        points = getRequest.result; // Assign the retrieved points
+        console.log("Loaded points from IndexedDB:", points);
+        render(); // Ensure rendering updates after loading data
+      } else {
+        console.warn("No points found in IndexedDB.");
+      }
+    };
+
+    getRequest.onerror = function () {
+      console.error("Error retrieving data from IndexedDB.");
+    };
+  };
+
+  dbRequest.onerror = function () {
+    console.error("Failed to open IndexedDB.");
+  };
+};
+
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
@@ -218,3 +247,5 @@ canvas.addEventListener("mouseup", onEnd);
 canvas.addEventListener("touchstart", startDragging);
 canvas.addEventListener("touchmove", onMove);
 canvas.addEventListener("touchend", onEnd);
+
+loadStoredData();
