@@ -9,9 +9,27 @@
 </head>
 
 <body>
+    <div class="navigate">
+        <a id="home" href="./index.html">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+                <path
+                    d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+            </svg>
+            home</a>
+    </div>
+
     <div class="uploads">
         <label for="fileInput">Start Uploading Datasets</label>
-        <input type="file" id="fileInput" />
+        <input type="file" id="fileInput" accept=".json" />
+    </div>
+    <div class="files">
+        <div class="file" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3">
+                <path
+                    d="m438-240 226-226-58-58-169 169-84-84-57 57 142 142ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
+            </svg>
+            File added to an IndexedDB. Start Visualizing by visiting the Home Screen.
+        </div>
     </div>
     <!-- role polite aria atomic true aria live polite -->
     <output class="info">Lightning fast uploads!</output>

@@ -38,7 +38,8 @@ output {
 }
 
 button,
-input[type="file"] {
+input[type="file"],
+a {
     margin: 20px;
     padding: 10px 20px;
     font-size: 1rem;
@@ -56,11 +57,13 @@ input[type="file"] {
 
 
 button:hover,
-input[type="file"]:hover {
+input[type="file"]:hover,
+a:hover {
     background-color: oklch(0.3 0.2 250deg);
 }
 
-button:active {
+button:active,
+a:active {
     background-color: oklch(0.4 0.3 250deg);
 }
 
@@ -71,10 +74,29 @@ button:disabled {
 
 .uploads {
     max-inline-size: 800px;
-    padding-block: 40px;
+    padding-block: 100px;
     margin-inline: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.navigate {
+    position: absolute;
+}
+
+.files {
+    display: block;
+    max-width: 800px;
+    padding: 20px;
+    margin: auto;
+}
+
+.file {
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: oklch(0.2 0.3 170deg);
 }

@@ -10,6 +10,10 @@ document.getElementById("fileInput").addEventListener("change", (event) => {
 
 worker.onmessage = function (event) {
   if (event.data.type === "done") {
+    document.querySelector(".file").style.display = "flex";
+    document.querySelector(".info").textContent = event.data.message;
+  } else if (event.data.type === "error") {
+    document.querySelector(".file").style.display = "none";
     document.querySelector(".info").textContent = event.data.message;
   }
 };
