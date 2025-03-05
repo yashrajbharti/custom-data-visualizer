@@ -89,21 +89,11 @@ const loadStoredData = () => {
 
     getRequest.onsuccess = function () {
       if (getRequest.result.length > 0) {
-        points = getRequest.result; // Assign the retrieved points
-        console.log("Loaded points from IndexedDB:", points);
-        render(); // Ensure rendering updates after loading data
-      } else {
-        console.warn("No points found in IndexedDB.");
+        points = getRequest.result;
+        console.log(points.length);
+        render();
       }
     };
-
-    getRequest.onerror = function () {
-      console.error("Error retrieving data from IndexedDB.");
-    };
-  };
-
-  dbRequest.onerror = function () {
-    console.error("Failed to open IndexedDB.");
   };
 };
 
@@ -139,7 +129,7 @@ const render = () => {
     ].x.toFixed(2)}, ${points[focusedIndex].y.toFixed(2)}`
   );
 };
-render();
+// render();
 
 const getEventCoordinates = (event) => {
   const rect = canvas.getBoundingClientRect();

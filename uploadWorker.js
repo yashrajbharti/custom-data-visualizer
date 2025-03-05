@@ -14,6 +14,7 @@ self.onmessage = async function (event) {
             "Invalid JSON format! Expected an array of {x, y} points."
           );
         }
+        indexedDB.deleteDatabase("largeDataDB");
         const dbRequest = indexedDB.open("largeDataDB", 1);
         dbRequest.onupgradeneeded = function (event) {
           const db = event.target.result;
