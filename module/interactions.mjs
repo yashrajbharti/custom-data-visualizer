@@ -46,7 +46,7 @@ export const onMove = (event, points, focusedIndex) => {
     clearTimeout(nestTimeout);
     let dataPoints;
     nestTimeout = setTimeout(
-      () => (dataPoints = attemptNesting(points, dragIndex)),
+      () => (dataPoints = attemptNesting(points, dragIndex, focusedIndex)),
       1200
     );
     if (dataPoints) return dataPoints;
@@ -59,7 +59,7 @@ export const onEnd = () => {
   clearTimeout(nestTimeout);
 };
 
-export const attemptNesting = (points, index) => {
+export const attemptNesting = (points, index, focusedIndex = index) => {
   const draggedPoint = points[index];
   for (let i = 0; i < points.length; i++) {
     if (i !== index) {
@@ -72,8 +72,11 @@ export const attemptNesting = (points, index) => {
       if (distance < 0.05) {
         if (!parent.children) parent.children = [];
         parent.children.push(draggedPoint);
+        console.warn(parent);
         points.splice(index, 1);
-        updateInfo(`Nested a dot at level ${getNestingDepth(parent)}`, 1200);
+        if (index < i) i--; // because removal of a dot changes index
+        focusedIndex = i;
+        updateInfo("Nested a dot", 1200);
         render(points, i, true);
         return points;
       }
