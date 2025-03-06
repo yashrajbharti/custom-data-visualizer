@@ -74,3 +74,41 @@ export const multiplyMatrices = (matrixA, matrixB) => {
     result3[3],
   ];
 };
+export const applyMatrix = (point, matrix) => {
+  const [x, y, z] = point;
+  return [
+    matrix[0] * x + matrix[4] * y + matrix[8] * z + matrix[12],
+    matrix[1] * x + matrix[5] * y + matrix[9] * z + matrix[13],
+    matrix[2] * x + matrix[6] * y + matrix[10] * z + matrix[14],
+  ];
+};
+
+export const inverseMatrix = (matrix) => {
+  const m = matrix;
+  const det =
+    m[0] * (m[5] * m[10] - m[6] * m[9]) -
+    m[1] * (m[4] * m[10] - m[6] * m[8]) +
+    m[2] * (m[4] * m[9] - m[5] * m[8]);
+
+  if (Math.abs(det) < 1e-6) return matrix; // Avoid division by zero
+
+  const invDet = 1.0 / det;
+  return [
+    (m[5] * m[10] - m[6] * m[9]) * invDet,
+    (m[2] * m[9] - m[1] * m[10]) * invDet,
+    (m[1] * m[6] - m[2] * m[5]) * invDet,
+    0,
+    (m[6] * m[8] - m[4] * m[10]) * invDet,
+    (m[0] * m[10] - m[2] * m[8]) * invDet,
+    (m[2] * m[4] - m[0] * m[6]) * invDet,
+    0,
+    (m[4] * m[9] - m[5] * m[8]) * invDet,
+    (m[1] * m[8] - m[0] * m[9]) * invDet,
+    (m[0] * m[5] - m[1] * m[4]) * invDet,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ];
+};

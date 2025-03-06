@@ -4,7 +4,7 @@ import { updateInfo } from "./info.mjs";
 import { resizeCanvas } from "./resize.mjs";
 import { getZoomScale } from "./store.mjs";
 import { rotationMatrix } from "./rotateMatrix.mjs";
-import { multiplyMatrices } from "./multiplyMatrices.mjs";
+import { multiplyMatrices } from "./matrixUtils.mjs";
 
 const canvas = document.getElementById("canvas");
 const gl = canvas.getContext("webgl2");
