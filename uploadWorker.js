@@ -1,9 +1,9 @@
-self.onmessage = async function (event) {
+self.onmessage = async (event) => {
   const { data } = event;
   if (data.type === "upload") {
     const { file } = data;
     const reader = new FileReader();
-    reader.onload = async function (e) {
+    reader.onload = async (e) => {
       try {
         const jsonData = JSON.parse(e.target.result);
         if (
@@ -16,24 +16,24 @@ self.onmessage = async function (event) {
         }
         indexedDB.deleteDatabase("largeDataDB");
         const dbRequest = indexedDB.open("largeDataDB", 1);
-        dbRequest.onupgradeneeded = function (event) {
+        dbRequest.onupgradeneeded = (event) => {
           const db = event.target.result;
           if (!db.objectStoreNames.contains("data")) {
             db.createObjectStore("data", { keyPath: "id" });
           }
         };
-        dbRequest.onsuccess = function (event) {
+        dbRequest.onsuccess = (event) => {
           const db = event.target.result;
           const transaction = db.transaction("data", "readwrite");
           const store = transaction.objectStore("data");
 
           jsonData.forEach((point) => store.put(point));
 
-          transaction.oncomplete = function () {
+          transaction.oncomplete = () => {
             self.postMessage({ type: "done", message: "Upload complete" });
           };
 
-          transaction.onerror = function () {
+          transaction.onerror = () => {
             self.postMessage({ type: "error", message: "Upload failed" });
           };
         };

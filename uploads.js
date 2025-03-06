@@ -8,7 +8,7 @@ document.getElementById("fileInput").addEventListener("change", (event) => {
   }
 });
 
-worker.onmessage = function (event) {
+worker.onmessage = (event) => {
   if (event.data.type === "done") {
     document.querySelector(".file").style.display = "flex";
     document.querySelector(".info").textContent = event.data.message;

@@ -12,7 +12,7 @@ let history = [];
 let redoStack = [];
 let focusedIndex = 0;
 
-function handleUndoRedo(isRedo) {
+const handleUndoRedo = (isRedo) => {
   if (isRedo) {
     [points, history, redoStack] = redo(
       points,
@@ -28,9 +28,9 @@ function handleUndoRedo(isRedo) {
       redoStack
     );
   }
-}
+};
 
-function handleKeyboardEvents(event) {
+const handleKeyboardEvents = (event) => {
   if (event.key === "Tab") {
     event.preventDefault();
     focusedIndex =
@@ -58,9 +58,9 @@ function handleKeyboardEvents(event) {
     handleUndoRedo(event.shiftKey);
     event.preventDefault();
   }
-}
+};
 
-function setupEventListeners() {
+const setupEventListeners = () => {
   canvas.addEventListener("mousedown", handleStartDragging);
   canvas.addEventListener("mousemove", (e) => onMove(e, points, focusedIndex));
   canvas.addEventListener("mouseup", onEnd);
@@ -75,9 +75,9 @@ function setupEventListeners() {
     .getElementById("redo")
     .addEventListener("click", () => handleUndoRedo(true));
   document.addEventListener("keydown", handleKeyboardEvents);
-}
+};
 
-function handleStartDragging(event) {
+const handleStartDragging = (event) => {
   [history, redoStack, focusedIndex] = startDragging(
     event,
     points,
@@ -85,7 +85,7 @@ function handleStartDragging(event) {
     history,
     redoStack
   );
-}
+};
 
 loadStoredData(points, focusedIndex);
 setupEventListeners();
