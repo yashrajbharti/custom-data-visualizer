@@ -62,6 +62,8 @@ const handleKeyboardEvents = (event) => {
           rotationY += rotationSpeed;
           break;
       }
+      if (isNaN(rotationX) || isNaN(rotationY)) return;
+
       updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
       setRotation(rotationX, rotationY);
       render(points, focusedIndex, isRotating);
@@ -110,6 +112,7 @@ const handleRotation = (event) => {
   rotationY += dx;
   lastX = event.clientX;
   lastY = event.clientY;
+  if (isNaN(rotationX) || isNaN(rotationY)) return;
   updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
   setRotation(rotationX, rotationY);
   render(points, focusedIndex, isRotating);
@@ -125,6 +128,7 @@ const handleTouchRotation = (event) => {
   rotationY += dx;
   lastX = event.touches[0].clientX;
   lastY = event.touches[0].clientY;
+  if (isNaN(rotationX) || isNaN(rotationY)) return;
   updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
   setRotation(rotationX, rotationY);
   render(points, focusedIndex, isRotating);

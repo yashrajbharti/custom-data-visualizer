@@ -7,7 +7,7 @@
 | **Action**             | **Laptop**                          | **Phone**                       |
 |------------------------|-------------------------------------|---------------------------------|
 | **Drag a Dot**         | `Click + Drag`                      | `Touch + Move`                  |
-| **Drag focused dot**   | `Arrow Keys`                        | `Touch + Move`                  |
+| **Drag Focused Dot**   | `Arrow Keys`                        | `Touch + Move`                  |
 | **Rotate the Sphere**  | `Hold Shift + Mouse Drag/Arrow Keys`| `Two-Finger Touch & Rotate`     |
 | **Nest a Dot**         | `Drag and Hold (1.2s)`              | `Touch & Hold (1.2s)`           |
 | **Nest a Dot**         | `Ctrl + M (while dragging)`         | `Touch & Hold (1.2s)`           |
