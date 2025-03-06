@@ -6,7 +6,7 @@ let loadedCount = 0;
 const NUM_COMPARTMENTS = 64;
 let compartments = Array.from({ length: NUM_COMPARTMENTS }, () => []);
 
-const worker = new Worker("./dataWorker.mjs");
+const worker = new Worker("../dataWorker.js");
 worker.postMessage("startProcessing");
 
 worker.onmessage = (event) => {
