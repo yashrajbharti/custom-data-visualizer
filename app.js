@@ -1,6 +1,3 @@
-// WebGL2 MVP
-// Later to be upgraded with a 3D Earth model
-
 const canvas = document.getElementById("canvas");
 const info = document.querySelector(".info");
 const gl = canvas.getContext("webgl2");
@@ -14,20 +11,22 @@ const updateInfo = (text) => {
 
 const resizeCanvas = () => {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr;
-  canvas.height = window.innerHeight * dpr;
-  canvas.style.width = window.innerWidth + "px";
-  canvas.style.height = window.innerHeight + "px";
+  const size = Math.min(window.innerWidth, window.innerHeight);
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + "px";
+  canvas.style.height = size + "px";
   gl.viewport(0, 0, canvas.width, canvas.height);
 };
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 const vertexShaderSource = `#version 300 es
-layout(location = 0) in vec2 a_position;
+layout(location = 0) in vec3 a_position;
+uniform mat4 u_matrix;
 void main() {
     gl_PointSize = 5.0;
-    gl_Position = vec4(a_position, 0.0, 1.0);
+    gl_Position = u_matrix * vec4(a_position, 1.0);
 }`;
 
 const fragmentShaderSource = `#version 300 es
@@ -35,11 +34,12 @@ precision highp float;
 out vec4 outColor;
 uniform int u_focusedIndex;
 uniform int u_index;
+
 void main() {
     if (u_focusedIndex == u_index) {
         outColor = vec4(0.0, 0.5, 0.0, 1.0);
     } else {
-        outColor = vec4(1.0, 1, 0.0, 1.0);
+        outColor = vec4(1.0, 1.0, 0.0, 1.0); 
     }
 }`;
 
@@ -71,6 +71,16 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 }
 gl.useProgram(program);
 
+const convertToSphereCoords = (x, y) => {
+  const lat = y * Math.PI;
+  const lng = x * 2 * Math.PI;
+  return [
+    Math.cos(lat) * Math.cos(lng),
+    Math.sin(lat),
+    Math.cos(lat) * Math.sin(lng),
+  ];
+};
+
 let points = [];
 const BATCH_SIZE = 5000;
 let loadedCount = 0;
@@ -87,11 +97,11 @@ const loadStoredData = () => {
     cursorRequest.onsuccess = function (event) {
       const cursor = event.target.result;
       if (cursor && loadedCount < BATCH_SIZE) {
-        points.push(cursor.value);
+        points.push(convertToSphereCoords(cursor.value.x, cursor.value.y));
         loadedCount++;
         cursor.continue();
       } else {
-        console.log(`Loaded ${points.length} points`);
+        // console.log(`Loaded ${points.length} points`);
         render();
       }
     };
@@ -103,7 +113,9 @@ gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 gl.enableVertexAttribArray(positionAttributeLocation);
-gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+
+const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 
 const focusedIndexLocation = gl.getUniformLocation(program, "u_focusedIndex");
 gl.uniform1i(focusedIndexLocation, -1);
@@ -115,37 +127,45 @@ let dragging = false;
 let dragIndex = -1;
 
 const render = () => {
-  gl.clearColor(0, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.useProgram(program);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
-  points.forEach((p, index) => {
-    gl.uniform1i(focusedIndexLocation, index === focusedIndex ? 1 : 0);
-    const flatPoints = new Float32Array([p.x, p.y]);
-    gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.DYNAMIC_DRAW);
-    gl.drawArrays(gl.POINTS, 0, 1);
-  });
+  const flatPoints = new Float32Array(points.flat());
+  gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.DYNAMIC_DRAW);
+
+  const rotationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  gl.uniformMatrix4fv(matrixLocation, false, rotationMatrix);
+
+  for (let i = 0; i < points.length; i++) {
+    gl.uniform1i(focusedIndexLocation, focusedIndex === i);
+    gl.drawArrays(gl.POINTS, i, 1);
+  }
+
   updateInfo(
     `Focused point index: ${focusedIndex}, moved to ${points[
       focusedIndex
-    ].x.toFixed(2)}, ${points[focusedIndex].y.toFixed(2)}`
+    ][0].toFixed(2)}, ${points[focusedIndex][1].toFixed(2)}`
   );
 };
-// render();
+
+gl.clearColor(0, 0, 0, 1);
+gl.enable(gl.DEPTH_TEST);
 
 const getEventCoordinates = (event) => {
   const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  let clientX, clientY;
-  if (event.touches) {
-    clientX = event.touches[0].clientX;
-    clientY = event.touches[0].clientY;
-  } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
-  }
-  const x = ((clientX - rect.left) / (canvas.width / dpr)) * 2 - 1;
-  const y = -(((clientY - rect.top) / (canvas.height / dpr)) * 2 - 1);
-  return { x, y };
+  let clientX = event.touches ? event.touches[0].clientX : event.clientX;
+  let clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+  const x = ((clientX - rect.left) / canvas.clientWidth) * 2 - 1;
+  const y = -(((clientY - rect.top) / canvas.clientHeight) * 2 - 1);
+
+  return normalize([x, y, Math.sqrt(1 - x * x - y * y)]);
+};
+
+const normalize = ([x, y, z]) => {
+  const length = Math.sqrt(x * x + y * y + z * z);
+  return [x / length, y / length, z / length];
 };
 
 const enableButton = (_button) => {
@@ -208,17 +228,21 @@ window.addEventListener("keydown", (event) => {
     disableButton("redo");
 
     let moveAmount = 0.05;
-    if (event.key === "ArrowUp") points[focusedIndex].y += moveAmount;
-    if (event.key === "ArrowDown") points[focusedIndex].y -= moveAmount;
-    if (event.key === "ArrowLeft") points[focusedIndex].x -= moveAmount;
-    if (event.key === "ArrowRight") points[focusedIndex].x += moveAmount;
+    if (event.key === "ArrowUp") points[focusedIndex][1] += moveAmount;
+    if (event.key === "ArrowDown") points[focusedIndex][1] -= moveAmount;
+    if (event.key === "ArrowLeft") points[focusedIndex][0] -= moveAmount;
+    if (event.key === "ArrowRight") points[focusedIndex][0] += moveAmount;
+
+    points[focusedIndex] = normalize(points[focusedIndex]);
     render();
   }
 });
 
 const startDragging = (event) => {
-  const { x, y } = getEventCoordinates(event);
-  dragIndex = points.findIndex((p) => Math.hypot(p.x - x, p.y - y) < 0.05);
+  const [x, y, z] = getEventCoordinates(event);
+  dragIndex = points.findIndex(
+    (p) => Math.hypot(p[0] - x, p[1] - y, p[2] - z) < 0.05
+  );
   if (dragIndex !== -1) {
     focusedIndex = dragIndex;
     dragging = true;
@@ -231,8 +255,8 @@ const startDragging = (event) => {
 
 const onMove = (event) => {
   if (dragging && dragIndex !== -1) {
-    const { x, y } = getEventCoordinates(event);
-    points[dragIndex] = { x, y };
+    const [x, y, z] = getEventCoordinates(event);
+    if (!isNaN(x) && !isNaN(y)) points[dragIndex] = [x, y, z];
     render();
   }
 };

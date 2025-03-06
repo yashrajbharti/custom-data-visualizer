@@ -13,9 +13,17 @@ body {
     color: oklch(0.9 0 0);
 }
 
+.wrapper {
+    block-size: 100dvh;
+    inline-size: 100%;
+    display: grid;
+    place-items: center;
+}
+
 canvas {
     block-size: 100dvh;
     inline-size: 100%;
+    margin: auto;
 }
 
 .controls {
