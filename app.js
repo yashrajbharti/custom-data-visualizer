@@ -209,11 +209,11 @@ if (history.length === 0) disableButton("undo");
 if (redoStack.length === 0) disableButton("redo");
 
 window.addEventListener("keydown", (event) => {
-  if (event.ctrlKey && event.key === "n") {
+  if (event.ctrlKey && event.key === "m") {
     event.preventDefault();
     const dataPoints = attemptNesting(points, focusedIndex);
     if (dataPoints) points = dataPoints;
-  } else if (event.ctrlKey && event.shiftKey && event.key === "N") {
+  } else if (event.ctrlKey && event.shiftKey && event.key === "M") {
     event.preventDefault();
     const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
     if (dataPoints) points = dataPoints;
