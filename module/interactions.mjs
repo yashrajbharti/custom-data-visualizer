@@ -4,7 +4,6 @@ import { enableButton, disableButton } from "./buttonState.mjs";
 import { inverseMatrix, applyMatrix } from "./matrixUtils.mjs";
 import { rotationMatrix } from "./rotateMatrix.mjs";
 import { updateInfo } from "./info.mjs";
-import { getNestingDepth } from "./getNestedDepth.mjs";
 
 let dragging = false;
 let dragIndex = -1;

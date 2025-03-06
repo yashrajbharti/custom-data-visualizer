@@ -3,6 +3,17 @@ import { render } from "./render.mjs";
 
 const BATCH_SIZE = 5000;
 let loadedCount = 0;
+const NUM_COMPARTMENTS = 64;
+let compartments = Array.from({ length: NUM_COMPARTMENTS }, () => []);
+
+const worker = new Worker("./dataWorker.mjs");
+worker.postMessage("startProcessing");
+
+worker.onmessage = (event) => {
+  if (event.data.type === "processedData") {
+    compartments = event.data.compartments;
+  }
+};
 
 export const loadStoredData = (points, focusedIndex) => {
   const dbRequest = indexedDB.open("largeDataDB", 1);
@@ -20,9 +31,34 @@ export const loadStoredData = (points, focusedIndex) => {
         loadedCount++;
         cursor.continue();
       } else {
-        // console.log(`Loaded ${points.length} points`);
         render(points, focusedIndex);
       }
     };
   };
+};
+
+export const loadVisibleCompartments = (
+  zoomLevel,
+  viewCoords,
+  points,
+  focusedIndex
+) => {
+  const visibleCompartments = determineVisibleCompartments(
+    zoomLevel,
+    viewCoords
+  );
+  points.length = 0;
+
+  visibleCompartments.forEach((compIndex) => {
+    points.push(...compartments[compIndex]);
+  });
+
+  render(points, focusedIndex);
+  return points;
+};
+
+const determineVisibleCompartments = (zoomLevel, viewCoords) => {
+  return [
+    /* array of visible compartment indexes */
+  ];
 };
