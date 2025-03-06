@@ -2,12 +2,16 @@ import { vertexShaderSource, fragmentShaderSource } from "./shaders.mjs";
 import { createShader } from "./createShader.mjs";
 import { updateInfo } from "./info.mjs";
 import { resizeCanvas } from "./resize.mjs";
+import { getZoomScale } from "./store.mjs";
+import { rotationMatrix } from "./rotateMatrix.mjs";
+import { multiplyMatrices } from "./multiplyMatrices.mjs";
 
 const canvas = document.getElementById("canvas");
 const gl = canvas.getContext("webgl2");
 if (!gl) {
   console.error("WebGL2 not supported");
 }
+
 const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 const fragmentShader = createShader(
   gl,
@@ -41,10 +45,34 @@ export const render = (points, focusedIndex) => {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
   const flatPoints = new Float32Array(points.flat());
+  const zoomScale = getZoomScale() || 1;
   gl.bufferData(gl.ARRAY_BUFFER, flatPoints, gl.DYNAMIC_DRAW);
 
-  const rotationMatrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-  gl.uniformMatrix4fv(matrixLocation, false, rotationMatrix);
+  const viewMatrix = [
+    zoomScale,
+    0,
+    0,
+    0,
+    0,
+    zoomScale,
+    0,
+    0,
+    0,
+    0,
+    zoomScale,
+    0,
+    0,
+    0,
+    0,
+    1,
+  ];
+  const rotateMatrix = rotationMatrix();
+
+  gl.uniformMatrix4fv(
+    matrixLocation,
+    false,
+    multiplyMatrices(viewMatrix, rotateMatrix)
+  );
 
   for (let i = 0; i < points.length; i++) {
     gl.uniform1i(focusedIndexLocation, focusedIndex === i);

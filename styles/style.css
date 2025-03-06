@@ -108,3 +108,26 @@ button:disabled {
     border-radius: 10px;
     background-color: oklch(0.2 0.3 170deg);
 }
+
+.zoom-control {
+    position: absolute;
+    inset-block-end: 120px;
+    inset-inline-end: 0;
+    background-color: oklch(0.3 0.1 250deg);
+    inline-size: fit-content;
+    margin: 15px;
+    padding: 10px 5px;
+    border-radius: 10px;
+
+    &>button {
+        font-family: monospace, sans-serif;
+        margin: 5px;
+        font-size: 1.3rem;
+    }
+
+    &>hr {
+        background-color: oklch(0.5 0.1 250deg);
+        border-color: oklch(0.5 0.1 250deg);
+    }
+
+}

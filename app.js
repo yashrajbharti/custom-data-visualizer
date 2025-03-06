@@ -4,6 +4,8 @@ import { render } from "./module/render.mjs";
 import { loadStoredData } from "./module/loadData.mjs";
 import { startDragging, onMove, onEnd } from "./module/interactions.mjs";
 import { undo, redo } from "./module/history.mjs";
+import { setRotation, setZoomScale } from "./module/store.mjs";
+import { updateInfo } from "./module/info.mjs";
 
 const canvas = document.getElementById("canvas");
 
@@ -11,23 +13,19 @@ let points = [];
 let history = [];
 let redoStack = [];
 let focusedIndex = 0;
+let zoomScale = 1.0;
+const zoomStep = 0.1;
+const minZoom = 0.5;
+const maxZoom = 3.0;
+let [rotationX, rotationY] = [0, 0];
+let rotationSpeed = 0.02;
+let isRotating = false;
+let lastX, lastY;
 
 const handleUndoRedo = (isRedo) => {
-  if (isRedo) {
-    [points, history, redoStack] = redo(
-      points,
-      focusedIndex,
-      history,
-      redoStack
-    );
-  } else {
-    [points, history, redoStack] = undo(
-      points,
-      focusedIndex,
-      history,
-      redoStack
-    );
-  }
+  [points, history, redoStack] = isRedo
+    ? redo(points, focusedIndex, history, redoStack)
+    : undo(points, focusedIndex, history, redoStack);
 };
 
 const handleKeyboardEvents = (event) => {
@@ -37,27 +35,88 @@ const handleKeyboardEvents = (event) => {
       (focusedIndex + (event.shiftKey ? -1 : 1) + points.length) %
       points.length;
     render(points, focusedIndex);
-  } else if (
-    ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
-  ) {
-    event.preventDefault();
-    history.push(JSON.parse(JSON.stringify(points)));
-    redoStack = [];
-    enableButton("undo");
-    disableButton("redo");
+    return;
+  }
 
-    const moveAmount = 0.05;
-    if (event.key === "ArrowUp") points[focusedIndex][1] += moveAmount;
-    if (event.key === "ArrowDown") points[focusedIndex][1] -= moveAmount;
-    if (event.key === "ArrowLeft") points[focusedIndex][0] -= moveAmount;
-    if (event.key === "ArrowRight") points[focusedIndex][0] += moveAmount;
+  if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+    if (event.shiftKey) {
+      isRotating = true;
+      switch (event.key) {
+        case "ArrowUp":
+          rotationX = Math.max(rotationX - rotationSpeed, -Math.PI / 2);
+          break;
+        case "ArrowDown":
+          rotationX = Math.min(rotationX + rotationSpeed, Math.PI / 2);
+          break;
+        case "ArrowLeft":
+          rotationY -= rotationSpeed;
+          break;
+        case "ArrowRight":
+          rotationY += rotationSpeed;
+          break;
+      }
+      setRotation(rotationX, rotationY);
+      render(points, focusedIndex);
+    } else {
+      event.preventDefault();
+      history.push(JSON.parse(JSON.stringify(points)));
+      redoStack = [];
+      enableButton("undo");
+      disableButton("redo");
 
-    points[focusedIndex] = normalize(points[focusedIndex]);
-    render(points, focusedIndex);
-  } else if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+      const moveAmount = 0.05;
+      if (event.key === "ArrowUp") points[focusedIndex][1] += moveAmount;
+      if (event.key === "ArrowDown") points[focusedIndex][1] -= moveAmount;
+      if (event.key === "ArrowLeft") points[focusedIndex][0] -= moveAmount;
+      if (event.key === "ArrowRight") points[focusedIndex][0] += moveAmount;
+
+      points[focusedIndex] = normalize(points[focusedIndex]);
+      render(points, focusedIndex);
+      return;
+    }
+  }
+
+  if ((event.ctrlKey || event.metaKey) && event.key === "z") {
     handleUndoRedo(event.shiftKey);
     event.preventDefault();
   }
+};
+
+const handleStartDragging = (event) => {
+  if (!event.shiftKey) {
+    [history, redoStack, focusedIndex] = startDragging(
+      event,
+      points,
+      focusedIndex,
+      history,
+      redoStack
+    );
+  }
+};
+
+const handleRotation = (event) => {
+  if (!isRotating) return;
+  const dx = (event.clientX - lastX) * rotationSpeed;
+  const dy = (event.clientY - lastY) * rotationSpeed;
+  rotationX = Math.max(rotationX - dy, -Math.PI / 2);
+  rotationY += dx;
+  lastX = event.clientX;
+  lastY = event.clientY;
+  setRotation(rotationX, rotationY);
+  render(points, focusedIndex);
+};
+
+const handleTouchRotation = (event) => {
+  if (event.touches.length !== 2) return;
+  event.preventDefault();
+  const dx = (event.touches[0].clientX - lastX) * rotationSpeed;
+  const dy = (event.touches[0].clientY - lastY) * rotationSpeed;
+  rotationX = Math.max(rotationX - dy, -Math.PI / 2);
+  rotationY += dx;
+  lastX = event.touches[0].clientX;
+  lastY = event.touches[0].clientY;
+  setRotation(rotationX, rotationY);
+  render(points, focusedIndex);
 };
 
 const setupEventListeners = () => {
@@ -65,7 +124,10 @@ const setupEventListeners = () => {
   canvas.addEventListener("mousemove", (e) => onMove(e, points, focusedIndex));
   canvas.addEventListener("mouseup", onEnd);
   canvas.addEventListener("touchstart", handleStartDragging);
-  canvas.addEventListener("touchmove", (e) => onMove(e, points, focusedIndex));
+  canvas.addEventListener(
+    "touchmove",
+    (e) => e.touches.length !== 2 && onMove(e, points, focusedIndex)
+  );
   canvas.addEventListener("touchend", onEnd);
 
   document
@@ -75,20 +137,44 @@ const setupEventListeners = () => {
     .getElementById("redo")
     .addEventListener("click", () => handleUndoRedo(true));
   document.addEventListener("keydown", handleKeyboardEvents);
-};
 
-const handleStartDragging = (event) => {
-  [history, redoStack, focusedIndex] = startDragging(
-    event,
-    points,
-    focusedIndex,
-    history,
-    redoStack
-  );
+  document.getElementById("zoom-in").addEventListener("click", () => {
+    zoomScale = Math.min(zoomScale + zoomStep, maxZoom);
+    setZoomScale(zoomScale);
+    render(points, focusedIndex);
+    updateInfo("Zooming in");
+  });
+
+  document.getElementById("zoom-out").addEventListener("click", () => {
+    zoomScale = Math.max(zoomScale - zoomStep, minZoom);
+    setZoomScale(zoomScale);
+    render(points, focusedIndex);
+    updateInfo("Zooming out");
+  });
+
+  canvas.addEventListener("mousedown", (event) => {
+    if (event.shiftKey) {
+      isRotating = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
+    }
+  });
+
+  canvas.addEventListener("mousemove", handleRotation);
+  canvas.addEventListener("mouseup", () => (isRotating = false));
+  canvas.addEventListener("mouseleave", () => (isRotating = false));
+
+  canvas.addEventListener("touchstart", (event) => {
+    if (event.touches.length === 2) {
+      event.preventDefault();
+      lastX = event.touches[0].clientX;
+      lastY = event.touches[0].clientY;
+    }
+  });
+  canvas.addEventListener("touchmove", handleTouchRotation);
 };
 
 loadStoredData(points, focusedIndex);
 setupEventListeners();
-
 if (history.length === 0) disableButton("undo");
 if (redoStack.length === 0) disableButton("redo");
