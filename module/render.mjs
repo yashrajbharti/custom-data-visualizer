@@ -7,6 +7,8 @@ import { rotationMatrix } from "./rotateMatrix.mjs";
 import { multiplyMatrices } from "./matrixUtils.mjs";
 
 const canvas = document.getElementById("canvas");
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 const gl = canvas.getContext("webgl2");
 if (!gl) {
   console.error("WebGL2 not supported");
@@ -89,5 +91,3 @@ export const render = (points, focusedIndex, customAction = false) => {
 
 gl.clearColor(0, 0, 0, 1);
 gl.enable(gl.DEPTH_TEST);
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();

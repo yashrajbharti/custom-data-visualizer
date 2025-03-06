@@ -21,8 +21,8 @@ body {
 }
 
 canvas {
-    block-size: 100dvh;
     inline-size: 100%;
+    aspect-ratio: 1/1;
     margin: auto;
 }
 

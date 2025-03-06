@@ -1,6 +1,6 @@
+import { render } from "./module/render.mjs";
 import { normalize } from "./module/normalize.mjs";
 import { enableButton, disableButton } from "./module/buttonState.mjs";
-import { render } from "./module/render.mjs";
 import { loadStoredData } from "./module/loadData.mjs";
 import {
   startDragging,
