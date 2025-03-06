@@ -142,11 +142,12 @@ const render = () => {
     gl.drawArrays(gl.POINTS, i, 1);
   }
 
-  updateInfo(
-    `Focused point index: ${focusedIndex}, moved to ${points[
-      focusedIndex
-    ][0].toFixed(2)}, ${points[focusedIndex][1].toFixed(2)}`
-  );
+  if (points.length)
+    updateInfo(
+      `Focused point index: ${focusedIndex}, moved to ${points[
+        focusedIndex
+      ][0]?.toFixed(2)}, ${points[focusedIndex][1]?.toFixed(2)}`
+    );
 };
 
 gl.clearColor(0, 0, 0, 1);

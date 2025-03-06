@@ -29,7 +29,13 @@ self.onmessage = async function (event) {
 
           jsonData.forEach((point) => store.put(point));
 
-          self.postMessage({ type: "done", message: "Upload complete" });
+          transaction.oncomplete = function () {
+            self.postMessage({ type: "done", message: "Upload complete" });
+          };
+
+          transaction.onerror = function () {
+            self.postMessage({ type: "error", message: "Upload failed" });
+          };
         };
       } catch {
         self.postMessage({
