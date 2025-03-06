@@ -72,7 +72,6 @@ export const attemptNesting = (points, index, focusedIndex = index) => {
       if (distance < 0.05) {
         if (!parent.children) parent.children = [];
         parent.children.push(draggedPoint);
-        console.warn(parent);
         points.splice(index, 1);
         if (index < i) i--; // because removal of a dot changes index
         focusedIndex = i;
