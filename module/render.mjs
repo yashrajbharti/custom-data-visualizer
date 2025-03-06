@@ -61,7 +61,7 @@ export const render = (points, focusedIndex, customAction = false) => {
     0,
     0,
     0,
-    zoomScale,
+    0.1,
     0,
     0,
     0,
