@@ -1,59 +1,20 @@
+import { vertexShaderSource, fragmentShaderSource } from "./module/shaders.mjs";
+import { updateInfo } from "./module/info.mjs";
+import { resizeCanvas } from "./module/resize.mjs";
+import { createShader } from "./module/createShader.mjs";
+import { convertToSphereCoords } from "./module/sphere.mjs";
+import { normalize } from "./module/normalize.mjs";
+import { getEventCoordinates } from "./module/eventCoordinates.mjs";
+import { enableButton, disableButton } from "./module/buttonState.mjs";
+
 const canvas = document.getElementById("canvas");
-const info = document.querySelector(".info");
 const gl = canvas.getContext("webgl2");
 if (!gl) {
   console.error("WebGL2 not supported");
 }
 
-const updateInfo = (text) => {
-  info.textContent = text;
-};
-
-const resizeCanvas = () => {
-  const dpr = window.devicePixelRatio || 1;
-  const size = Math.min(window.innerWidth, window.innerHeight);
-  canvas.width = size * dpr;
-  canvas.height = size * dpr;
-  canvas.style.width = size + "px";
-  canvas.style.height = size + "px";
-  gl.viewport(0, 0, canvas.width, canvas.height);
-};
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-
-const vertexShaderSource = `#version 300 es
-layout(location = 0) in vec3 a_position;
-uniform mat4 u_matrix;
-void main() {
-    gl_PointSize = 5.0;
-    gl_Position = u_matrix * vec4(a_position, 1.0);
-}`;
-
-const fragmentShaderSource = `#version 300 es
-precision highp float;
-out vec4 outColor;
-uniform int u_focusedIndex;
-uniform int u_index;
-
-void main() {
-    if (u_focusedIndex == u_index) {
-        outColor = vec4(0.0, 0.5, 0.0, 1.0);
-    } else {
-        outColor = vec4(1.0, 1.0, 0.0, 1.0); 
-    }
-}`;
-
-const createShader = (gl, type, source) => {
-  const shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    return null;
-  }
-  return shader;
-};
 
 const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 const fragmentShader = createShader(
@@ -70,16 +31,6 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
   console.error(gl.getProgramInfoLog(program));
 }
 gl.useProgram(program);
-
-const convertToSphereCoords = (x, y) => {
-  const lat = y * Math.PI;
-  const lng = x * 2 * Math.PI;
-  return [
-    Math.cos(lat) * Math.cos(lng),
-    Math.sin(lat),
-    Math.cos(lat) * Math.sin(lng),
-  ];
-};
 
 let points = [];
 const BATCH_SIZE = 5000;
@@ -153,30 +104,6 @@ const render = () => {
 gl.clearColor(0, 0, 0, 1);
 gl.enable(gl.DEPTH_TEST);
 
-const getEventCoordinates = (event) => {
-  const rect = canvas.getBoundingClientRect();
-  let clientX = event.touches ? event.touches[0].clientX : event.clientX;
-  let clientY = event.touches ? event.touches[0].clientY : event.clientY;
-
-  const x = ((clientX - rect.left) / canvas.clientWidth) * 2 - 1;
-  const y = -(((clientY - rect.top) / canvas.clientHeight) * 2 - 1);
-
-  return normalize([x, y, Math.sqrt(1 - x * x - y * y)]);
-};
-
-const normalize = ([x, y, z]) => {
-  const length = Math.sqrt(x * x + y * y + z * z);
-  return [x / length, y / length, z / length];
-};
-
-const enableButton = (_button) => {
-  const button = document.getElementById(_button);
-  button.removeAttribute("disabled");
-};
-const disableButton = (_button) => {
-  const button = document.getElementById(_button);
-  button.setAttribute("disabled", "true");
-};
 const undo = () => {
   if (history.length > 0) {
     redoStack.push(JSON.parse(JSON.stringify(points)));
