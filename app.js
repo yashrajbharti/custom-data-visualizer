@@ -2,7 +2,13 @@ import { normalize } from "./module/normalize.mjs";
 import { enableButton, disableButton } from "./module/buttonState.mjs";
 import { render } from "./module/render.mjs";
 import { loadStoredData } from "./module/loadData.mjs";
-import { startDragging, onMove, onEnd } from "./module/interactions.mjs";
+import {
+  startDragging,
+  onMove,
+  onEnd,
+  burstNestedDotByOneLevel,
+  attemptNesting,
+} from "./module/interactions.mjs";
 import { undo, redo } from "./module/history.mjs";
 import { setRotation, setZoomScale } from "./module/store.mjs";
 import { updateInfo } from "./module/info.mjs";
@@ -21,6 +27,7 @@ let [rotationX, rotationY] = [0, 0];
 let rotationSpeed = 0.02;
 let isRotating = false;
 let lastX, lastY;
+let lastTap = 0;
 
 const handleUndoRedo = (isRedo) => {
   [points, history, redoStack] = isRedo
@@ -125,14 +132,28 @@ const handleTouchRotation = (event) => {
 
 const setupEventListeners = () => {
   canvas.addEventListener("mousedown", handleStartDragging);
-  canvas.addEventListener("mousemove", (e) => onMove(e, points, focusedIndex));
+  canvas.addEventListener("mousemove", (e) => {
+    const dataPoints = onMove(e, points, focusedIndex);
+    if (dataPoints) points = dataPoints;
+  });
   canvas.addEventListener("mouseup", onEnd);
   canvas.addEventListener("touchstart", handleStartDragging);
-  canvas.addEventListener(
-    "touchmove",
-    (e) => e.touches.length !== 2 && onMove(e, points, focusedIndex)
-  );
-  canvas.addEventListener("touchend", onEnd);
+  canvas.addEventListener("touchmove", (e) => {
+    if (e.touches.length !== 2) {
+      const dataPoints = onMove(e, points, focusedIndex);
+      if (dataPoints) points = dataPoints;
+    }
+  });
+  canvas.addEventListener("touchend", () => {
+    onEnd();
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    if (tapLength < 300 && tapLength > 0) {
+      const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+      if (dataPoints) points = dataPoints;
+    }
+    lastTap = currentTime;
+  });
 
   document
     .getElementById("undo")
@@ -176,9 +197,25 @@ const setupEventListeners = () => {
     }
   });
   canvas.addEventListener("touchmove", handleTouchRotation);
+  canvas.addEventListener("dblclick", () => {
+    const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+    if (dataPoints) points = dataPoints;
+  });
 };
 
 loadStoredData(points, focusedIndex);
 setupEventListeners();
 if (history.length === 0) disableButton("undo");
 if (redoStack.length === 0) disableButton("redo");
+
+window.addEventListener("keydown", (event) => {
+  if (event.ctrlKey && event.key === "n") {
+    event.preventDefault();
+    const dataPoints = attemptNesting(points, focusedIndex);
+    if (dataPoints) points = dataPoints;
+  } else if (event.ctrlKey && event.shiftKey && event.key === "N") {
+    event.preventDefault();
+    const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+    if (dataPoints) points = dataPoints;
+  }
+});

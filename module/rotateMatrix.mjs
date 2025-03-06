@@ -2,10 +2,10 @@ import { getRotation } from "./store.mjs";
 
 export const rotationMatrix = () => {
   const [rotationX, rotationY] = getRotation();
-  const cosX = Math.cos(rotationX);
-  const sinX = Math.sin(rotationX);
-  const cosY = Math.cos(rotationY);
-  const sinY = Math.sin(rotationY);
+  const cosX = Math.cos(rotationX) || 0;
+  const sinX = Math.sin(rotationX) || 0;
+  const cosY = Math.cos(rotationY) || 0;
+  const sinY = Math.sin(rotationY) || 0;
 
   return [
     cosY,
