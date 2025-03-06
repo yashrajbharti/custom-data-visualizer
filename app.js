@@ -1,54 +1,36 @@
-import { updateInfo } from "./module/info.mjs";
 import { normalize } from "./module/normalize.mjs";
 import { enableButton, disableButton } from "./module/buttonState.mjs";
 import { render } from "./module/render.mjs";
 import { loadStoredData } from "./module/loadData.mjs";
 import { startDragging, onMove, onEnd } from "./module/interactions.mjs";
+import { undo, redo } from "./module/history.mjs";
 
 const canvas = document.getElementById("canvas");
 
 let points = [];
-
 let history = [];
 let redoStack = [];
 let focusedIndex = 0;
 
-const undo = () => {
-  if (history.length > 0) {
-    redoStack.push(JSON.parse(JSON.stringify(points)));
-    points = history.pop();
-    render(points, focusedIndex);
-    updateInfo("Undo action performed");
-    enableButton("redo");
-  } else disableButton("undo");
-};
-const redo = () => {
-  if (redoStack.length > 0) {
-    history.push(JSON.parse(JSON.stringify(points)));
-    points = redoStack.pop();
-    render(points, focusedIndex);
-    updateInfo("Redo action performed");
-    enableButton("undo");
-  } else disableButton("redo");
-};
-
-if (history.length === 0) disableButton("undo");
-if (redoStack.length === 0) disableButton("redo");
-
-document.getElementById("undo").addEventListener("click", undo);
-document.getElementById("redo").addEventListener("click", redo);
-document.addEventListener("keydown", (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key === "z") {
-    if (event.shiftKey) {
-      redo();
-    } else {
-      undo();
-    }
-    event.preventDefault();
+function handleUndoRedo(isRedo) {
+  if (isRedo) {
+    [points, history, redoStack] = redo(
+      points,
+      focusedIndex,
+      history,
+      redoStack
+    );
+  } else {
+    [points, history, redoStack] = undo(
+      points,
+      focusedIndex,
+      history,
+      redoStack
+    );
   }
-});
+}
 
-window.addEventListener("keydown", (event) => {
+function handleKeyboardEvents(event) {
   if (event.key === "Tab") {
     event.preventDefault();
     focusedIndex =
@@ -64,7 +46,7 @@ window.addEventListener("keydown", (event) => {
     enableButton("undo");
     disableButton("redo");
 
-    let moveAmount = 0.05;
+    const moveAmount = 0.05;
     if (event.key === "ArrowUp") points[focusedIndex][1] += moveAmount;
     if (event.key === "ArrowDown") points[focusedIndex][1] -= moveAmount;
     if (event.key === "ArrowLeft") points[focusedIndex][0] -= moveAmount;
@@ -72,34 +54,41 @@ window.addEventListener("keydown", (event) => {
 
     points[focusedIndex] = normalize(points[focusedIndex]);
     render(points, focusedIndex);
+  } else if ((event.ctrlKey || event.metaKey) && event.key === "z") {
+    handleUndoRedo(event.shiftKey);
+    event.preventDefault();
   }
-});
+}
+
+function setupEventListeners() {
+  canvas.addEventListener("mousedown", handleStartDragging);
+  canvas.addEventListener("mousemove", (e) => onMove(e, points, focusedIndex));
+  canvas.addEventListener("mouseup", onEnd);
+  canvas.addEventListener("touchstart", handleStartDragging);
+  canvas.addEventListener("touchmove", (e) => onMove(e, points, focusedIndex));
+  canvas.addEventListener("touchend", onEnd);
+
+  document
+    .getElementById("undo")
+    .addEventListener("click", () => handleUndoRedo(false));
+  document
+    .getElementById("redo")
+    .addEventListener("click", () => handleUndoRedo(true));
+  document.addEventListener("keydown", handleKeyboardEvents);
+}
+
+function handleStartDragging(event) {
+  [history, redoStack, focusedIndex] = startDragging(
+    event,
+    points,
+    focusedIndex,
+    history,
+    redoStack
+  );
+}
 
 loadStoredData(points, focusedIndex);
+setupEventListeners();
 
-canvas.addEventListener(
-  "mousedown",
-  (e) =>
-    ([history, redoStack, focusedIndex] = startDragging(
-      e,
-      points,
-      focusedIndex,
-      history,
-      redoStack
-    ))
-);
-canvas.addEventListener("mousemove", (e) => onMove(e, points, focusedIndex));
-canvas.addEventListener("mouseup", onEnd);
-canvas.addEventListener(
-  "touchstart",
-  (e) =>
-    ([history, redoStack, focusedIndex] = startDragging(
-      e,
-      points,
-      focusedIndex,
-      history,
-      redoStack
-    ))
-);
-canvas.addEventListener("touchmove", (e) => onMove(e, points, focusedIndex));
-canvas.addEventListener("touchend", onEnd);
+if (history.length === 0) disableButton("undo");
+if (redoStack.length === 0) disableButton("redo");
