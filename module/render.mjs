@@ -39,7 +39,7 @@ gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 
-export const render = (points, focusedIndex) => {
+export const render = (points, focusedIndex, customAction = false) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -79,7 +79,7 @@ export const render = (points, focusedIndex) => {
     gl.drawArrays(gl.POINTS, i, 1);
   }
 
-  if (points.length)
+  if (points.length && !customAction)
     updateInfo(
       `Focused point index: ${focusedIndex}, moved to ${points[
         focusedIndex

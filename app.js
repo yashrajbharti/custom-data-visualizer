@@ -55,8 +55,9 @@ const handleKeyboardEvents = (event) => {
           rotationY += rotationSpeed;
           break;
       }
+      updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
       setRotation(rotationX, rotationY);
-      render(points, focusedIndex);
+      render(points, focusedIndex, isRotating);
     } else {
       event.preventDefault();
       history.push(JSON.parse(JSON.stringify(points)));
@@ -102,12 +103,14 @@ const handleRotation = (event) => {
   rotationY += dx;
   lastX = event.clientX;
   lastY = event.clientY;
+  updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
   setRotation(rotationX, rotationY);
-  render(points, focusedIndex);
+  render(points, focusedIndex, isRotating);
 };
 
 const handleTouchRotation = (event) => {
   if (event.touches.length !== 2) return;
+  isRotating = true;
   event.preventDefault();
   const dx = (event.touches[0].clientX - lastX) * rotationSpeed;
   const dy = (event.touches[0].clientY - lastY) * rotationSpeed;
@@ -115,8 +118,9 @@ const handleTouchRotation = (event) => {
   rotationY += dx;
   lastX = event.touches[0].clientX;
   lastY = event.touches[0].clientY;
+  updateInfo(`Rotating ${rotationX?.toFixed(2)} ${rotationY?.toFixed(2)}`);
   setRotation(rotationX, rotationY);
-  render(points, focusedIndex);
+  render(points, focusedIndex, isRotating);
 };
 
 const setupEventListeners = () => {
