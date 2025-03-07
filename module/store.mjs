@@ -2,7 +2,7 @@ export const setZoomScale = (value) => {
   localStorage.setItem("zoom", value.toString());
 };
 export const getZoomScale = () => {
-  return +localStorage.getItem("zoom") ?? 1;
+  return +localStorage.getItem("zoom") || 1;
 };
 
 export const setRotation = (x, y) => {
