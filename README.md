@@ -1,4 +1,13 @@
-# Problem Statement for UXE
+## 3D Data Visualizer
+
+A custom data viz made using JS (without any dependencies) and just 10kb bundle size offering rich interactions and 60fps.
+
+🎥  [3D Custom Data Viz Video Intro | Under 2 minutes ](https://youtu.be/MxIcZMYH0DU)
+
+<img width="1822" alt="Custom Data Viz as a 3D sphere" src="https://github.com/user-attachments/assets/6328ed98-699d-4156-9527-3b409399aaf0" />
+
+
+## Problem Statement for UXE
 
 !["The Data Viz question"](https://github.com/user-attachments/assets/9fd54ddf-63aa-4ffd-870e-ebdd8802abc5)
 
