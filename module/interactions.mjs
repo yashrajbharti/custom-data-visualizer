@@ -97,9 +97,8 @@ export const burstNestedDot = (points, index) => {
     };
     const allChildren = extractChildren(point);
     points.push(...allChildren);
+    updateInfo("Bursted a dot", 1200);
+    render(points, index, true);
+    return points;
   }
-
-  updateInfo("Bursted a dot", 1200);
-  render(points, index, true);
-  return points;
 };
