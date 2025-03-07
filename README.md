@@ -17,3 +17,13 @@
 
 > [!TIP]
 > Some data points will not be clickable as they are at the back of the sphere. Rotate the sphere to click them.
+
+## **Bundle Size**
+
+Running the following command:
+
+```bash
+tar -czf - app.js module/*.mjs | wc -c
+```
+
+will give 10240 = 10 KB when gzipped, truly compact for a 3D data viz that has all such controls and custom interactions.
