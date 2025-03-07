@@ -1,7 +1,7 @@
 import { render } from "./module/render.mjs";
 import { normalize } from "./module/normalize.mjs";
 import { enableButton, disableButton } from "./module/buttonState.mjs";
-import { loadStoredData } from "./module/loadData.mjs";
+import { loadStoredData, loadVisibleCompartments } from "./module/loadData.mjs";
 import {
   startDragging,
   onMove,
@@ -172,6 +172,9 @@ const setupEventListeners = () => {
     setZoomScale(zoomScale);
     render(points, focusedIndex);
     updateInfo(`Zooming in ${(zoomScale * 100).toFixed(2)}%`);
+    if (parseFloat(zoomScale.toFixed(1)) === 3) {
+      points = loadVisibleCompartments(points, focusedIndex);
+    }
   });
 
   document.getElementById("zoom-out").addEventListener("click", () => {
@@ -179,6 +182,9 @@ const setupEventListeners = () => {
     setZoomScale(zoomScale);
     render(points, focusedIndex);
     updateInfo(`Zooming out ${(zoomScale * 100).toFixed(2)}%`);
+    if (parseFloat(zoomScale.toFixed(1)) === 2.5) {
+      points = loadVisibleCompartments(points, focusedIndex);
+    }
   });
 
   canvas.addEventListener("mousedown", (event) => {

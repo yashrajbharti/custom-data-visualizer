@@ -1,6 +1,6 @@
 # Problem Statement for UXE
 
-<img width="691" alt="The Data Viz question" src="https://github.com/user-attachments/assets/9fd54ddf-63aa-4ffd-870e-ebdd8802abc5" />
+!["The Data Viz question"](https://github.com/user-attachments/assets/9fd54ddf-63aa-4ffd-870e-ebdd8802abc5)
 
 ## **Shortcut Table**
 
@@ -14,3 +14,6 @@
 | **Burst a Dot**        | `Double Click` / `Ctrl + Shift + M` | `Double Tap`                    |
 | **Undo Last Action**   | `Ctrl + Z`                          | *Not applicable*                |
 | **Redo Last Action**   | `Ctrl + Shift + Z`                  | *Not applicable*                |
+
+> [!TIP]
+> Some data points will not be clickable as they are at the back of the sphere. Rotate the sphere to click them.
