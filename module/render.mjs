@@ -85,7 +85,9 @@ export const render = (points, focusedIndex, customAction = false) => {
     updateInfo(
       `Focused point index: ${focusedIndex}, moved to ${points[
         focusedIndex
-      ][0]?.toFixed(2)}, ${points[focusedIndex][1]?.toFixed(2)}`
+      ][0]?.toFixed(2)}, ${points[focusedIndex][1]?.toFixed(2)}, ${points[
+        focusedIndex
+      ][2]?.toFixed(2)}`
     );
 };
 

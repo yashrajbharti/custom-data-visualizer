@@ -171,14 +171,14 @@ const setupEventListeners = () => {
     zoomScale = Math.min(zoomScale + zoomStep, maxZoom);
     setZoomScale(zoomScale);
     render(points, focusedIndex);
-    updateInfo("Zooming in");
+    updateInfo(`Zooming in ${(zoomScale * 100).toFixed(2)}%`);
   });
 
   document.getElementById("zoom-out").addEventListener("click", () => {
     zoomScale = Math.max(zoomScale - zoomStep, minZoom);
     setZoomScale(zoomScale);
     render(points, focusedIndex);
-    updateInfo("Zooming out");
+    updateInfo(`Zooming out ${(zoomScale * 100).toFixed(2)}%`);
   });
 
   canvas.addEventListener("mousedown", (event) => {

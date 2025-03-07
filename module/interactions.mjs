@@ -19,6 +19,7 @@ export const startDragging = (
 ) => {
   const [x, y, z] = getEventCoordinates(event);
   inverseRotateMatrix = inverseMatrix(rotationMatrix());
+
   const [invX, invY, invZ] = applyMatrix([x, y, z], inverseRotateMatrix);
 
   dragIndex = points.findIndex(
