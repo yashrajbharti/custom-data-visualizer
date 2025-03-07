@@ -85,11 +85,21 @@ export const attemptNesting = (points, index, focusedIndex = index) => {
 
 export const burstNestedDot = (points, index) => {
   const point = points[index];
+
   if (point.children && point.children.length > 0) {
-    points.push(...point.children);
-    point.children = [];
-    updateInfo("Bursted a dot", 1200);
-    render(points, index, true);
-    return points;
+    const extractChildren = (dot) => {
+      if (dot.children && dot.children.length > 0) {
+        const nestedDots = [...dot.children];
+        dot.children = [];
+        return nestedDots.concat(nestedDots.flatMap(extractChildren));
+      }
+      return [];
+    };
+    const allChildren = extractChildren(point);
+    points.push(...allChildren);
   }
+
+  updateInfo("Bursted a dot", 1200);
+  render(points, index, true);
+  return points;
 };
