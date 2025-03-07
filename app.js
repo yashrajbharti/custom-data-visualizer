@@ -6,7 +6,7 @@ import {
   startDragging,
   onMove,
   onEnd,
-  burstNestedDotByOneLevel,
+  burstNestedDot,
   attemptNesting,
 } from "./module/interactions.mjs";
 import { undo, redo } from "./module/history.mjs";
@@ -153,7 +153,7 @@ const setupEventListeners = () => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
     if (tapLength < 300 && tapLength > 0) {
-      const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+      const dataPoints = burstNestedDot(points, focusedIndex);
       if (dataPoints) points = dataPoints;
     }
     lastTap = currentTime;
@@ -208,7 +208,7 @@ const setupEventListeners = () => {
   });
   canvas.addEventListener("touchmove", handleTouchRotation);
   canvas.addEventListener("dblclick", () => {
-    const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+    const dataPoints = burstNestedDot(points, focusedIndex);
     if (dataPoints) points = dataPoints;
   });
 };
@@ -221,11 +221,12 @@ if (redoStack.length === 0) disableButton("redo");
 window.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.key === "m") {
     event.preventDefault();
-    const dataPoints = attemptNesting(points, focusedIndex);
+    const [dataPoints, index] = attemptNesting(points, focusedIndex);
     if (dataPoints) points = dataPoints;
+    if (index >= 0) focusedIndex = index;
   } else if (event.ctrlKey && event.shiftKey && event.key === "M") {
     event.preventDefault();
-    const dataPoints = burstNestedDotByOneLevel(points, focusedIndex);
+    const dataPoints = burstNestedDot(points, focusedIndex);
     if (dataPoints) points = dataPoints;
   }
 });

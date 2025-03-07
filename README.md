@@ -1,11 +1,10 @@
-## 3D Data Visualizer
+# 3D Data Visualizer
 
 A custom data viz made using JS (without any dependencies) and just 10kb bundle size offering rich interactions and 60fps.
 
-🎥  [3D Custom Data Viz Video Intro | Under 2 minutes ](https://youtu.be/MxIcZMYH0DU)
+🎥  [3D Custom Data Viz Youtube Intro | Under 2 minutes](https://youtu.be/MxIcZMYH0DU)
 
 <img width="1822" alt="Custom Data Viz as a 3D sphere" src="https://github.com/user-attachments/assets/6328ed98-699d-4156-9527-3b409399aaf0" />
-
 
 ## Problem Statement for UXE
 
@@ -39,7 +38,7 @@ will give 10240 = 10 KB when gzipped, truly compact for a 3D data viz that has a
 
 <img width="719" alt="gzipped size" src="https://github.com/user-attachments/assets/31507ab7-0199-4068-8b9d-9a542cadbb54" />
 
-## 60 FPS 
+## 60 FPS
 
 The whole data viz runs at 60 FPS and allows us to add upto 100K+ data points via something called "compartments". The sphere is divided into 64 such compartments and upon Zooming in it loads up more points from the nearest compartment. Also it keeps the maximum number of points on a zoomed out view to remain `MAX_BATCH_SIZE` which is 5000 data points.
 
@@ -50,4 +49,3 @@ The whole data viz runs at 60 FPS and allows us to add upto 100K+ data points vi
 Performance for the desktop devices is around `88` for this data visualizer as per Chrome lighthouse report. While the main target is to use it on phone where it offers the best perfomance possible with the best practices on the web with a Performance score of `100`.
 
 <img width="1501" alt="Perfomance on phone" src="https://github.com/user-attachments/assets/255b81d9-36b9-4a5f-bfff-c446167449ec" />
-

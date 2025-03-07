@@ -46,7 +46,7 @@ export const onMove = (event, points, focusedIndex) => {
     clearTimeout(nestTimeout);
     let dataPoints;
     nestTimeout = setTimeout(
-      () => (dataPoints = attemptNesting(points, dragIndex, focusedIndex)),
+      () => ([dataPoints, _] = attemptNesting(points, dragIndex, focusedIndex)),
       1200
     );
     if (dataPoints) return dataPoints;
@@ -77,13 +77,13 @@ export const attemptNesting = (points, index, focusedIndex = index) => {
         focusedIndex = i;
         updateInfo("Nested a dot", 1200);
         render(points, i, true);
-        return points;
+        return [points, i];
       }
     }
   }
 };
 
-export const burstNestedDotByOneLevel = (points, index) => {
+export const burstNestedDot = (points, index) => {
   const point = points[index];
   if (point.children && point.children.length > 0) {
     points.push(...point.children);
