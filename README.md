@@ -35,3 +35,10 @@ will give 10240 = 10 KB when gzipped, truly compact for a 3D data viz that has a
 The whole data viz runs at 60 FPS and allows us to add upto 100K+ data points via something called "compartments". The sphere is divided into 64 such compartments and upon Zooming in it loads up more points from the nearest compartment. Also it keeps the maximum number of points on a zoomed out view to remain `MAX_BATCH_SIZE` which is 5000 data points.
 
 <img width="1822" alt="3D Sphere Data Vizualization" src="https://github.com/user-attachments/assets/398c262d-342b-4eb3-85a7-655d5acaaba3" />
+
+## Performance
+
+Performance for the desktop devices is around `88` for this data visualizer as per Chrome lighthouse report. While the main target is to use it on phone where it offers the best perfomance possible with the best practices on the web with a Performance score of `100`.
+
+<img width="1501" alt="Perfomance on phone" src="https://github.com/user-attachments/assets/255b81d9-36b9-4a5f-bfff-c446167449ec" />
+
