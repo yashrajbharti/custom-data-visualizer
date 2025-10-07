@@ -1,3 +1,13 @@
+/**
+ * WebGL2 Rendering Module
+ *
+ * This module handles all WebGL2 rendering operations for the 3D sphere visualization.
+ * It manages shader compilation, buffer creation, and the rendering pipeline that draws
+ * data points on a 3D sphere with matrix transformations.
+ *
+ * @module render
+ */
+
 import { vertexShaderSource, fragmentShaderSource } from "./shaders.mjs";
 import { createShader } from "./createShader.mjs";
 import { updateInfo } from "./info.mjs";
@@ -9,11 +19,14 @@ import { multiplyMatrices } from "./matrixUtils.mjs";
 const canvas = document.getElementById("canvas");
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
+
+// Initialize WebGL2 context
 const gl = canvas.getContext("webgl2");
 if (!gl) {
   console.error("WebGL2 not supported");
 }
 
+// Compile and link shaders
 const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
 const fragmentShader = createShader(
   gl,
@@ -21,6 +34,7 @@ const fragmentShader = createShader(
   fragmentShaderSource
 );
 
+// Create and link WebGL program
 const program = gl.createProgram();
 gl.attachShader(program, vertexShader);
 gl.attachShader(program, fragmentShader);
@@ -29,18 +43,40 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
   console.error(gl.getProgramInfoLog(program));
 }
 gl.useProgram(program);
-const focusedIndexLocation = gl.getUniformLocation(program, "u_focusedIndex");
 
+// Get uniform and attribute locations
+const focusedIndexLocation = gl.getUniformLocation(program, "u_focusedIndex");
 gl.uniform1i(focusedIndexLocation, -1);
+
+// Create and bind vertex buffer
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
+// Set up position attribute
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 gl.enableVertexAttribArray(positionAttributeLocation);
 gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 
+/**
+ * Renders all data points on the 3D sphere with applied transformations.
+ *
+ * This function performs the complete rendering pipeline:
+ * 1. Clears the canvas
+ * 2. Converts points array to Float32Array for WebGL
+ * 3. Applies zoom and rotation transformations via matrices
+ * 4. Renders each point individually with focus state
+ * 5. Updates UI with current focused point information
+ *
+ * @param {Array<Array<number>>} points - Array of 3D coordinates [x, y, z] for each point
+ * @param {number} focusedIndex - Index of the currently focused/selected point
+ * @param {boolean} [customAction=false] - If true, skips updating the info display
+ *
+ * @example
+ * const points = [[0.5, 0.5, 0.5], [0.3, 0.7, 0.2]];
+ * render(points, 0); // Renders points with first point focused
+ */
 export const render = (points, focusedIndex, customAction = false) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
